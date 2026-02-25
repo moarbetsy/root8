@@ -32,158 +32,14 @@
     }
     </script>
 
-    <!-- 
-    SECURITY TODO: Move to Production
-    1. The current CSP uses 'unsafe-inline' to ensure this single file works immediately.
-    2. To achieve 100/100 Best Practices, you must calculate the hashes for inline scripts:
-       Command: echo -n "EXACT_SCRIPT_CONTENT" | openssl dgst -sha384 -binary | openssl base64
-    3. Replace 'unsafe-inline' in script-src with 'sha384-YOUR_CALCULATED_HASH'
-    -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://private-us-east-1.manuscdn.com data:; connect-src 'self'; base-uri 'self'; form-action 'self'">
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data:;">
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <!--
-    DESIGN EXCEPTION TRIGGERED
-    Trigger: Performance 90 unreachable due to Framework CDN
-    Original Design Element: Tailwind CDN (cdn.tailwindcss.com)
-    Technical Constraint: External CSS framework adds ~150ms+ blocking time, preventing Performance ≥90.
-    Proposed Solution: Extract utility classes via PurgeCSS and inline them.
-    Visual Impact: None.
-    Tradeoffs:
-    ✓ What is gained: Performance score increase
-    ✗ What is lost: Convenience of dynamic classes
-    ⚠ Alternative considered: As an LLM I cannot dynamically run PurgeCSS to extract the ~15KB output. The CDN is retained with this documentation, but for strict production deployment, run: `npx purgecss --css styles.css --content index.html` and inline the result.
-    -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Tailwind Configuration -->
-    <script>
-        /*
-        ACCESSIBILITY FIX APPLIED: Button & Primary Color Contrast
-        Issue: Original primary '#6b9b7f' against foreground '#faf8f3' produced ~2.7:1 (FAIL WCAG AA).
-        Solution: Darkened primary color to '#457357' to achieve >4.5:1 ratio.
-        Visual Impact: Minimal - maintains the green hue but slightly darker for legal compliance.
-        */
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: { DEFAULT: '#457357', foreground: '#faf8f3' },
-                        background: '#faf8f3',
-                        foreground: '#2c2c2c',
-                        card: '#fff',
-                        'card-foreground': '#2c2c2c',
-                        secondary: '#d4c5b9',
-                        muted: { DEFAULT: '#e8e3dc', foreground: '#6b6b6b' },
-                        border: '#e8e3dc',
-                        destructive: '#f25a5a',
-                    },
-                    fontFamily: {
-                        sans: ['Open Sans', 'sans-serif'],
-                        heading: ['Poppins', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-
-    <!-- Custom CSS & Tailwind Abstractions -->
-    <style type="text/tailwindcss">
-        @layer base {
-            body {
-                font-family: theme('fontFamily.sans');
-                background-color: theme('colors.background');
-                color: theme('colors.foreground');
-                line-height: 1.6;
-            }
-            h1, h2, h3, h4, h5, h6 {
-                font-family: theme('fontFamily.heading');
-            }
-            
-            /* Accessibility: Target sizing */
-            button, a, input, select, textarea {
-                min-width: 24px;
-                min-height: 24px;
-            }
-            
-            /* Accessibility: Visible Focus Indicators */
-            :focus-visible {
-                outline: 3px solid theme('colors.primary.DEFAULT');
-                outline-offset: 3px;
-            }
-        }
-        
-        @layer components {
-            .heading-1 { @apply text-4xl md:text-5xl font-bold text-foreground leading-tight; }
-            .heading-2 { @apply text-3xl md:text-4xl font-bold text-foreground; }
-            .text-body { @apply text-lg text-foreground/80 leading-relaxed; }
-            
-            .btn { @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50; }
-            .btn-primary { @apply btn bg-primary hover:bg-primary/90 text-primary-foreground; }
-            .btn-lg { @apply text-lg px-8 py-6; }
-            .btn-sm { @apply text-sm h-9 px-4 py-2; }
-            
-            .nav-link { @apply text-foreground hover:text-primary transition-colors font-medium text-sm; }
-            .mobile-link { @apply block py-2 text-foreground hover:text-primary transition-colors font-medium; }
-            
-            .panel { @apply bg-white border-2 border-secondary rounded-lg p-8; }
-            .box-card { @apply panel shadow-sm; }
-            .feature-card { @apply bg-white border-2 border-secondary rounded-lg p-6 text-center hover:shadow-md transition-shadow; }
-            
-            .bullet-item { @apply flex items-start gap-3; }
-            .bullet-icon { @apply text-primary font-bold mt-1; }
-            .bullet-text { @apply text-foreground/80; }
-            
-            .step-circle { @apply bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold; }
-            .form-input { @apply w-full px-4 py-3 border-2 border-border rounded-lg focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 transition-colors; }
-            .accordion-btn { @apply focus-visible:ring-primary/50 flex w-full flex-1 items-start justify-between gap-4 rounded-md py-4 text-left text-lg font-bold text-foreground transition-all outline-none hover:text-primary focus-visible:ring-[3px]; }
-        }
-
-        @layer utilities {
-            .page { display: none; }
-            .page.active { display: block; animation: fadeIn 0.3s ease-in-out; }
-            
-            /* Visually hidden text for screen readers */
-            .sr-only {
-                position: absolute;
-                width: 1px;
-                height: 1px;
-                margin: -1px;
-                padding: 0;
-                overflow: hidden;
-                clip: rect(0, 0, 0, 0);
-                border: 0;
-            }
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .accordion-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-in-out;
-        }
-        .accordion-item.active .accordion-content { max-height: 500px; }
-        .accordion-item.active svg.chevron { transform: rotate(180deg); }
-        .accordion-item.active { @apply bg-primary/5; }
-
-        /* Accessibility: Reduced Motion Support */
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-                scroll-behavior: auto !important;
-            }
-            .accordion-content { transition: none; }
-            .page.active { animation: none; }
-        }
-    </style>
+    <!-- Compiled Tailwind CSS -->
+    <link href="/dist/output.css" rel="stylesheet" />
     
     <style>
         /* Essential pure CSS for skip link outside Tailwind processing */
@@ -269,7 +125,7 @@
                                 </a>
                             </div>
                             <div class="rounded-lg overflow-hidden shadow-lg">
-                                <!-- PERFORMANCE FIX: Added exact width/height derived from URL parameters to prevent CLS, and added fetchpriority="high" -->
+                                <!-- PERFORMANCE FIX: fetchpriority="high" is applied to prioritize downloading immediately -->
                                 <img src="https://private-us-east-1.manuscdn.com/sessionFile/PZGzRbYB6e3pafpbvbI1Dy/sandbox/BWeYIqOoh3y4PTs2Hf3wHW-img-1_1771951425000_na1fn_aGVyby1ob21l.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvUFpHelJiWUI2ZTNwYWZwYnZiSTFEeS9zYW5kYm94L0JXZVlJcU9vaDN5NFBUczJIZjN3SFctaW1nLTFfMTc3MTk1MTQyNTAwMF9uYTFmbl9hR1Z5Ynkxb2IyMWwucG5nP3gtb3NzLXByb2Nlc3M9aW1hZ2UvcmVzaXplLHdfMTkyMCxoXzE5MjAvZm9ybWF0LHdlYnAvcXVhbGl0eSxxXzgwIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzk4NzYxNjAwfX19XX0_&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=m~poMO7jxG0m9tHIE9HyN~uStsieQ6wzI-CEb2mLrITXwr9B7CD-6iEDaIu0IwSZJDWQNoNZMLp9qHoZeQl1QzJNFQw2ALgvKC~9pDT0gflyIYIZPBZq6GXbNHvw2IKbXAtsHPkzIEpNjCnd39AfADXcg27RFG-cIB~oZZe8EGh6dlrj9-UdUCnFxamEPw7tTJylTY8yyE0KYKGaWp4VqpqfNM6YEEGnoQDIMPo7ldUIMybBCltR5-ykQouLuySyM19zqjWteKsyzaohM~4PyHiApLfBnqQjq1BQ7i0WCCN~Kd5hRaIn9SrdRnJ-3C4tZTJ2Tm1UIkmMdJY06d~3Bg__" 
                                      alt="Diverse group engaging in a supportive movement activity" 
                                      width="1920" 
@@ -1282,3 +1138,4 @@
     </script>
 </body>
 </html>
+```
